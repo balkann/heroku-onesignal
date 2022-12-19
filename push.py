@@ -13,11 +13,20 @@ from collections import defaultdict
 #7 first language
 # example calling python3 push.py 5--DayStart 15--DayEnd
 
+
+
+dotenv_path = join(dirname(__file__),".env")
+load_dotenv(dotenv_path)
+def EnvGet(key):
+    return os.environ.get(key)
+
+
 pnMonth = "December"
-rest_api_key = " "
+rest_api_key = EnvGet("REST_KEY")
 rest_api_encryption = "Basic"
 
 times = ["12:30PM","06:00PM","09:00PM"]
+
 
 class NotifArray:
     def __init__(self) : 
@@ -45,8 +54,6 @@ class Message:
         enTitle = self.titleDic["en"]
         enMessage = self.messageDic["en"]
         return f"Time= {self.hour}/{self.day}/{self.month}\nTitle: {enTitle}\nMessage: {enMessage} \n\n"
-
-
 
 
 if rest_api_key == "" : 
@@ -150,28 +157,27 @@ def CreateMessage(order, hour, day, month):
 
 #languageDictionary["en"] = Emojize("Find the perfect pair of heels for you and shine on the podium! :sparkles::sparkling_heart:")
 
-def ScheduleNotif(titleDic, langDic, hour, day, month):
+def ScheduleNotif(msg : Message):
     
     url = "https://onesignal.com/api/v1/notifications"
     
     app_id = "77ba9bcd-4fa6-4393-b7e0-2f569592c40f" ##high heels app id
-    date = f"{month} {day}, 2022 02:00 AM UTC-03:00"
+    date = f"{msg.month} {msg.day}, 2022 02:00 AM UTC-03:00"
 
     campaignName = "UncoAutomation"
 
-    titleDictionary = titleDic
-    content = langDic
-
+    titleDictionary = msg.titleDic
+    content = msg.messageDic
 
     payload = {
         "app_id" : app_id,
         "included_segments": ["Subscribed Users"],
-        "headings" : titleDic,
+        "headings" : titleDictionary,
         "contents": content,
-        "name": titleDic["en"],
+        "name": titleDictionary["en"],
         "send_after": date,
         "delayed_option": "timezone",
-        "delivery_time_of_day": hour
+        "delivery_time_of_day": msg.hour
     }
 
     headers = {
@@ -185,7 +191,7 @@ def ControlCsvFile():
     for i in range(0, rowCount):
         CreateMessage(i)
 
-def testRun(startDay, endDay, restKey):
+def sendNotifs(startDay, endDay, restKey):
     rest_api_key = restKey
    
     notif_array = NotifArray()
@@ -193,29 +199,11 @@ def testRun(startDay, endDay, restKey):
         for k in range(0,3):
             key = ((i*k)+i) % rowCount
             notif_array.add(CreateMessage(key, times[k], i, pnMonth))
-            #ScheduleNotif(titleDictionary, languageDictionary , pnMonth, i, times[k])
-            #print(f"Message sent: {i} {times[k]}")
-            #print(titleDictionary["en"])
     notif_array.print()
     result = input("Do you want to send these messages? y/n")
     if(result == "y"):
         for message in notif_array.messages:
-            ScheduleNotif(message.titleDic, message.messageDic, message.hour, message.day, message.month)
+            ScheduleNotif(message)
 
 
-if(__name__ == "__main__"):
-    #ControlCsvFile()
-    notif_array = NotifArray()
-    for i in range(dayStart, dayEnd+1) :
-        for k in range(0,3):
-            key = ((i*k)+i) % rowCount
-            notif_array.add(CreateMessage(key, times[k], i, pnMonth))
-            #ScheduleNotif(titleDictionary, languageDictionary , pnMonth, i, times[k])
-            #print(f"Message sent: {i} {times[k]}")
-            #print(titleDictionary["en"])
-    notif_array.print()
-    result = input("Do you want to send these messages? y/n")
-    if(result == "y"):
-        for message in notif_array.messages:
-            ScheduleNotif(message.titleDic, message.messageDic, message.hour, message.day, message.month)
-
+    
