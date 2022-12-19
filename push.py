@@ -36,6 +36,13 @@ class NotifArray:
         for val in self.messages:
             print(val)
 
+    def __str__(self):
+        str = ""
+        for val in self.messages:
+            str += val.__str__()
+            str += "\n"
+        return str
+
     def add(self, x):
         self.messages.append(x)
     
@@ -204,6 +211,7 @@ def sendNotifs(startDay, endDay, restKey):
     if(result == "y"):
         for message in notif_array.messages:
             ScheduleNotif(message)
+    return notif_array
 
 
     

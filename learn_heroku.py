@@ -8,10 +8,12 @@ helloWorld = "HELLO WORLD"
 app = flask.Flask(__name__)
 
 @app.route('/')
+def home():
+    return "Welcome"
+
 @app.route('/<int:startDay>/<int:endDay>/<string:key>')
-def home(startDay, endDay, key):
-    push.sendNotifs(startDay, endDay, key)
-    return f"{startDay} {endDay} {key}"
+def sendNotif(startDay, endDay, key):
+    return f"{push.sendNotifs(startDay, endDay, key)}"
 
 
 if(__name__ == "__main__"):
